@@ -1,0 +1,69 @@
+#!/bin/bash
+#
+#================================ Set make environment variables ================================
+#
+# Related file storage path
+current_path="${PWD}"
+armbian_origin_img="${current_path}/armbian.img"
+armbian_origin_dir="${current_path}/armbian"
+armbian_rebuild_file="${current_path}/armbian-msm8916.img"
+armbian_rebuild_dir="${current_path}/armbian-msm8916"
+common_file="${current_path}/common-file/*"
+
+make_img() {
+    dd if=/dev/zero of=${armbian_rebuild_file} bs=1M count=1536
+    mkfs.btrfs ${armbian_rebuild_file}
+}
+
+mount_img() {
+    mount -o compress=zstd ${armbian_rebuild_file} ${armbian_rebuild_dir}
+}
+
+mount_etc() {
+    mount --bind /proc ${armbian_rebuild_dir}/proc
+    mount --bind /dev ${armbian_rebuild_dir}/dev
+    mount --bind /dev/pts ${armbian_rebuild_dir}/dev/pts
+    mount --bind /sys ${armbian_rebuild_dir}/sys
+}
+
+umount_img() {
+    umount ${armbian_rebuild_dir}/proc
+    umount ${armbian_rebuild_dir}/dev/pts
+    umount ${armbian_rebuild_dir}/dev
+    umount ${armbian_rebuild_dir}/sys
+    umount ${armbian_rebuild_dir}
+}
+
+copy_file() {
+    cp -rfp ${armbian_origin_dir}/* ${armbian_rebuild_dir}
+    cp ${common_file} ${armbian_rebuild_dir}/tmp
+}
+
+remove_file() {
+    rm ${armbian_rebuild_dir}/tmp/*
+}
+
+mount_origin_armbian_img() {
+    losetup -P /dev/loop404 ${armbian_origin_img}
+    mount /dev/loop404p1 ${armbian_origin_dir}
+}
+
+umount_origin_armbian_img() {
+    umount ${armbian_origin_dir}
+    losetup -d /dev/loop404
+}
+
+mkdir ${armbian_origin_dir}
+mkdir ${armbian_rebuild_dir}
+make_img
+mount_img
+mount_origin_armbian_img
+copy_file
+mount_etc
+chroot ${armbian_rebuild_dir} /tmp/chroot.sh
+remove_file
+umount_img
+umount_origin_armbian_img
+img2simg ${armbian_rebuild_file} rootfs.img
+rm -rf ${armbian_origin_dir}
+rm -rf ${armbian_rebuild_dir}

@@ -9,6 +9,7 @@ armbian_origin_dir="${current_path}/armbian"
 armbian_rebuild_file="${current_path}/armbian-msm8916.img"
 armbian_rebuild_dir="${current_path}/armbian-msm8916"
 common_file="${current_path}/common-file/*"
+kernel_deb="${current_path}/kernel/*.deb"
 
 make_img() {
     dd if=/dev/zero of=${armbian_rebuild_file} bs=1M count=1536
@@ -37,6 +38,7 @@ umount_img() {
 copy_file() {
     cp -rfp ${armbian_origin_dir}/* ${armbian_rebuild_dir}
     cp ${common_file} ${armbian_rebuild_dir}/tmp
+    cp ${kernel_deb} ${armbian_rebuild_dir}/tmp
 }
 
 remove_file() {

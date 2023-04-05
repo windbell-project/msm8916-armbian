@@ -1,0 +1,12 @@
+[Unit]
+Description=Setup USB networking
+Requires=NetworkManager.service
+After=NetworkManager.service
+ConditionFirstBoot=yes
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/mobian-setup-usb-network
+
+[Install]
+WantedBy=multi-user.target

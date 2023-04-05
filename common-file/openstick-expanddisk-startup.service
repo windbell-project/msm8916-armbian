@@ -1,0 +1,11 @@
+[Unit]
+Description=Expand root to full size
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/openstick-expanddisk-startup.sh
+ExecStartPost=/bin/systemctl disable openstick-expanddisk-startup.service
+
+[Install]
+WantedBy=multi-user.target 
+

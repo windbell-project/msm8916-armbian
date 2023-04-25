@@ -2,6 +2,6 @@
 tag=$(wget -qO- -t1 -T2 "https://api.github.com/repos/ophub/amlogic-s9xxx-armbian/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
 file=$(wget -qO- -t1 -T2 "https://api.github.com/repos/ophub/amlogic-s9xxx-armbian/releases/latest" | grep "trunk" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
 
-wget https://github.com/ophub/amlogic-s9xxx-armbian/releases/download/${tag}/${file} -O armbian.gz
-gunzip armbian.gz
+wget https://github.com/ophub/amlogic-s9xxx-armbian/releases/download/${tag}/${file}
+gunzip Armbian_*.gz
 mv Armbian_*.img armbian.img

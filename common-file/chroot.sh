@@ -46,6 +46,11 @@ enable_motd() {
     chmod +x /etc/update-motd.d/*
 }
 
+clean_apt_lists() {
+    rm -rf /var/lib/apt/lists
+    apt clean all
+}
+
 remove_package
 clean_file
 install_package
@@ -53,4 +58,5 @@ update-alternatives --set iptables /usr/sbin/iptables-legacy
 set_language
 common_set
 enable_motd
+clean_apt_lists
 exit

@@ -29,6 +29,7 @@ common_set() {
     cp /tmp/openstick-expanddisk-startup.sh /usr/sbin/
     cp /tmp/rules.v4 /etc/iptables/
     touch /etc/fstab
+    echo "LABEL=aarch64 / btrfs defaults,noatime,compress=zstd,commit=30 0 0" > /etc/fstab
     sed -i '13 i\nmcli c u USB' /etc/rc.local
     sed -i 1s/-e// /etc/rc.local
     sed -i s/forking/idle/g /usr/lib/systemd/system/rc-local.service

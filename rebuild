@@ -17,7 +17,7 @@ make_img() {
 }
 
 mount_img() {
-    mount -o compress=zstd ${armbian_rebuild_file} ${armbian_rebuild_dir}
+    mount -o compress=zstd:15 ${armbian_rebuild_file} ${armbian_rebuild_dir}
 }
 
 mount_etc() {

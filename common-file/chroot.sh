@@ -37,6 +37,8 @@ common_set() {
     sed -i s/'# ZRAM_PERCENTAGE=50'/ZRAM_PERCENTAGE=300/g /etc/default/armbian-zram-config
     sed -i s/'# MEM_LIMIT_PERCENTAGE=50'/MEM_LIMIT_PERCENTAGE=300/g /etc/default/armbian-zram-config
     sed -i '21 s/$sim/sim:sel/' /usr/sbin/openstick-sim-changer.sh
+    rm /etc/localtime
+    ln -s /usr/share/zoneinfo/Asia/Chongqing /etc/localtime
 }
 
 clean_file() {

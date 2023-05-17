@@ -13,6 +13,19 @@ kernel_deb="${current_path}/kernel/*.deb"
 temp_img="${current_path}/temp.img"
 temp_dir="${current_path}/temp"
 
+choose_device() {
+printf "请输入要构建的设备：1: UFI001C 2: UFI003\n"
+read a
+case "$a" in
+1)
+device="ufi001c"
+;;
+2)
+device="ufi003"
+;;
+esac
+}
+
 make_img() {
     dd if=/dev/zero of=${temp_img} bs=1M count=1536
     dd if=/dev/zero of=${armbian_rebuild_file} bs=1M count=1234
@@ -50,6 +63,10 @@ copy_file() {
     cp ${kernel_deb} ${temp_dir}/tmp
 }
 
+copy_modem_file() {
+    cp ${current_path}/modem/firmware-${device}.deb ${temp_dir}/tmp
+}
+
 remove_file() {
     rm ${temp_dir}/tmp/*
 }
@@ -68,6 +85,7 @@ resize_img() {
     cp -rfp ${temp_dir}/* ${armbian_rebuild_dir}
 }
 
+choose_device
 mkdir ${armbian_origin_dir}
 mkdir ${armbian_rebuild_dir}
 mkdir ${temp_dir}
@@ -75,6 +93,7 @@ make_img
 mount_img
 mount_origin_armbian_img
 copy_file
+copy_modem_file
 mount_etc
 chroot ${temp_dir} /tmp/chroot.sh
 remove_file

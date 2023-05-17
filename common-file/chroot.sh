@@ -6,7 +6,7 @@ install_package() {
     apt install -y coreutils network-manager modemmanager bc bsdmainutils gawk
     apt --fix-broken install -y
     apt install -y libqmi-utils
-    apt install -y iptables-persistent
+    DEBIAN_FRONTEND=noninteractive apt install -y iptables-persistent
     apt install -y dnsmasq-base
 }
 

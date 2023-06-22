@@ -1,0 +1,39 @@
+#==========================================================================
+# Description: Build Armbian
+# Copyright (C) 2023 https://github.com/windbell-project/msm8916-armbian
+#==========================================================================
+
+name: Rebuild armbian
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Installing Dependencies
+        run: |
+          sudo apt update -y
+          sudo apt-get install -y zip flex bison libncurses-dev gawk  libiberty-dev autoconf kmod bc build-essential gcc libc6 curl libstdc++6 git wget libssl-dev cpio p7zip-full img2simg qemu-user-static
+          sudo apt clean
+      - name: Download source
+        run: |
+          git clone https://github.com/windbell-project/msm8916-armbian
+      - name: Download image
+        run: |
+          pushd msm8916-armbian
+          ./download
+          popd
+      - name: Rebuild armbian
+        run: |
+          pushd msm8916-armbian
+          sudo ./rebuild 1
+          popd
+      - name: Upload Armbian image to Release
+        uses: ncipollo/release-action@main
+        with:
+          artifacts: msm8916-armbian/rootfs.img
+          name: "armbian_image"
+          tag: "armbian_image"
+          token: ${{ secrets.GITHUB_TOKEN }}

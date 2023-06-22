@@ -7,33 +7,58 @@ name: Rebuild armbian
 
 on:
   workflow_dispatch:
+    inputs:
+      armbian_board:
+        description: "选择设备"
+        required: true
+        default: "ufi003"
+        type: choice
+        options:
+          - ufi001c
+          - ufi003
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Installing Dependencies
+      - name: 安装依赖
         run: |
           sudo apt update -y
           sudo apt-get install -y zip flex bison libncurses-dev gawk  libiberty-dev autoconf kmod bc build-essential gcc libc6 curl libstdc++6 git wget libssl-dev cpio p7zip-full img2simg qemu-user-static
           sudo apt clean
-      - name: Download source
+      - name: 下载源码
         run: |
           git clone https://github.com/windbell-project/msm8916-armbian
-      - name: Download image
+      - name: 下载镜像
         run: |
           pushd msm8916-armbian
           ./download
           popd
-      - name: Rebuild armbian
+      - name: 打包 Armbian
         run: |
           pushd msm8916-armbian
-          sudo ./rebuild 1
+          echo "armbian_board="${{ inputs.armbian_board }}""
+          if  [ "${armbian_board}" == ufi001c ]; then
+              sudo ./rebuild 1
+          else
+              sudo ./rebuild 2
+          fi
           popd
-      - name: Upload Armbian image to Release
+          echo "build_tag=Armbian_jammy_$(date +"%Y.%m")" >> ${GITHUB_OUTPUT}
+      - name: 上传 Armbian 镜像至 Release
         uses: ncipollo/release-action@main
         with:
           artifacts: msm8916-armbian/rootfs.img
-          name: "armbian_image"
-          tag: "armbian_image"
+          name: ${{ steps.init.outputs.build_tag }}
+          tag: ${{ steps.init.outputs.build_tag }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          body: |
+            ###以下是 Armbian OS 镜像
+            - 本次固件基带为${{ inputs.armbian_board }}
+            - 系统信息：
+            - 默认用户名：root
+            - 默认密码：1234
+            - 全局配置命令：armbian-config
+            - WiFi名称：4G-UFI
+            - WiFi密码：12345678
+            - 如遇无法开机的情况请使用未超频内核boot-no-overclock.img

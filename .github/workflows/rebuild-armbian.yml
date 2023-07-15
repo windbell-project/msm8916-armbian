@@ -35,52 +35,52 @@ jobs:
           ./download
           popd
       - name: 打包 Armbian
+        id: repack
         run: |
-          echo "armbian_board="${{ inputs.armbian_board }}""
           pushd msm8916-armbian
-          mkdir armbian
-          mkdir armbian-msm8916
-          mkdir temp
-          dd if=/dev/zero of=temp.img bs=1M count=1536
-          dd if=/dev/zero of=armbian-msm8916.img bs=1M count=1234
-          mkfs.btrfs armbian-msm8916.img
-          mkfs.btrfs temp.img
-          mount -o compress=zstd:15 temp.img temp
-          mount -o compress=zstd:15 armbian-msm8916.img armbian-msm8916
-          losetup -P /dev/loop404 armbian.img
-          mount /dev/loop404p1 armbian
-          cp -rfp armbian/* temp
-          cp common-file/* temp/tmp
-          cp kernel/*.deb temp/tmp
-          cp modem/firmware-${armbian_board}.deb temp/tmp
-          mount --bind /proc temp/proc
-          mount --bind /dev temp/dev
-          mount --bind /dev/pts temp/dev/pts
-          mount --bind /sys temp/sys
-          chroot temp /tmp/chroot.sh
-          rm temp/tmp/*
-          umount temp/proc
-          umount temp/dev/pts
-          umount temp/dev
-          umount temp/sys
-          cp -rfp temp/* armbian-msm8916
-          umount temp
-          umount armbian-msm8916
-          umount armbian
-          losetup -d /dev/loop404
-          img2simg armbian-msm8916.img rootfs.img
-          rm temp.img
-          rm -rf armbian
-          rm -rf armbian-msm8916
-          rm -rf temp
+          sudo mkdir armbian
+          sudo mkdir armbian-msm8916
+          sudo mkdir temp
+          sudo dd if=/dev/zero of=temp.img bs=1M count=1536
+          sudo dd if=/dev/zero of=armbian-msm8916.img bs=1M count=1234
+          sudo mkfs.btrfs armbian-msm8916.img
+          sudo mkfs.btrfs temp.img
+          sudo mount -o compress=zstd:15 temp.img temp
+          sudo mount -o compress=zstd:15 armbian-msm8916.img armbian-msm8916
+          sudo losetup -P /dev/loop404 armbian.img
+          sudo mount /dev/loop404p1 armbian
+          sudo cp -rfp armbian/* temp
+          sudo cp common-file/* temp/tmp
+          sudo cp kernel/*.deb temp/tmp
+          sudo cp modem/firmware-${{ inputs.armbian_board }}.deb temp/tmp
+          sudo mount --bind /proc temp/proc
+          sudo mount --bind /dev temp/dev
+          sudo mount --bind /dev/pts temp/dev/pts
+          sudo mount --bind /sys temp/sys
+          sudo chroot temp /tmp/chroot.sh
+          sudo rm temp/tmp/*
+          sudo umount temp/proc
+          sudo umount temp/dev/pts
+          sudo umount temp/dev
+          sudo umount temp/sys
+          sudo cp -rfp temp/* armbian-msm8916
+          sudo umount temp
+          sudo umount armbian-msm8916
+          sudo umount armbian
+          sudo losetup -d /dev/loop404
+          sudo img2simg armbian-msm8916.img rootfs.img
+          sudo rm temp.img
+          sudo rm -rf armbian
+          sudo rm -rf armbian-msm8916
+          sudo rm -rf temp
           popd
-          echo "build_tag=Armbian_jammy_$(date +"%Y.%m")" >> ${GITHUB_OUTPUT}
+          echo "build_tag=Armbian_lunar_save_$(date +"%Y.%m")" >> ${GITHUB_OUTPUT}
       - name: 上传 Armbian 镜像至 Release
         uses: ncipollo/release-action@main
         with:
-          artifacts: msm8916-armbian/rootfs.img msm8916-armbian/kernel/boot.img
-          name: ${{ steps.init.outputs.build_tag }}
-          tag: ${{ steps.init.outputs.build_tag }}
+          artifacts: "msm8916-armbian/rootfs.img,msm8916-armbian/kernel/boot.img"
+          name: ${{ steps.repack.outputs.build_tag }}
+          tag: ${{ steps.repack.outputs.build_tag }}
           token: ${{ secrets.GITHUB_TOKEN }}
           body: |
             ###以下是 Armbian OS 镜像

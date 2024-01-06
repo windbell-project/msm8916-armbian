@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# 选择构建的设备
+echo "选择构建的设备："
+echo "1. ufi001c"
+echo "2. ufi003"
+read -p "请输入设备型号：" device_type
+
+# 设置设备型号
+case $device_type in
+1)
+  device_type="ufi001c"
+  ;;
+2)
+  device_type="ufi003"
+  ;;
+*)
+  echo "输入的设备型号不正确，请重新输入。"
+  exit 1
+  ;;
+esac
+
+# 创建目录
+mkdir -p original_image build temp
+
+# 创建镜像
+dd if=/dev/zero of=temp.img bs=1M count=1536
+mkfs.btrfs temp.img
+dd if=/dev/zero of=armbian-msm8916.img bs=1M count=1234
+mkfs.btrfs armbian-msm8916.img
+
+# 挂载镜像
+mount -t btrfs -o compress=zstd:15 temp.img temp
+mount -t btrfs -o compress=zstd:15 armbian-msm8916.img build
+losetup -P /dev/loop404 armbian.img
+mount /dev/loop404p1 original_image
+
+# 复制文件
+cp -frp original_image/* temp
+cp common-file/* temp/tmp
+cp kernel/*.deb temp/tmp
+cp modem/firmware-$device_type.deb temp/tmp
+
+# 挂载目录
+mount --bind /proc temp/proc
+mount --bind /dev temp/dev
+mount --bind /dev/pts temp/dev/pts
+mount --bind /sys temp/sys
+
+# 执行 chroot
+chroot temp /tmp/chroot.sh
+
+# 清理临时文件
+rm -rf temp/tmp/*
+
+# 卸载目录
+umount temp/proc
+umount temp/dev/pts
+umount temp/dev
+umount temp/sys
+
+# 复制文件
+cp -a temp/* build
+
+# 卸载镜像
+umount temp
+umount build
+umount original_image
+losetup -d /dev/loop404
+
+# 转换镜像
+img2simg armbian-msm8916.img rootfs.img
+
+# 清理工作目录
+rm -rf temp.img armbian-msm8916.img temp build original_image

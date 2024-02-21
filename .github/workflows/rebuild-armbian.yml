@@ -74,7 +74,7 @@ jobs:
           sudo rm -rf armbian-msm8916
           sudo rm -rf temp
           popd
-          echo "build_tag=Armbian_lunar_save_$(date +"%Y.%m")" >> ${GITHUB_OUTPUT}
+          echo "build_tag=Armbian_noble_save_$(date +"%Y.%m")" >> ${GITHUB_OUTPUT}
       - name: 上传 Armbian 镜像至 Release
         uses: ncipollo/release-action@main
         with:
@@ -83,7 +83,7 @@ jobs:
           tag: ${{ steps.repack.outputs.build_tag }}
           token: ${{ secrets.GITHUB_TOKEN }}
           body: |
-            ###以下是 Armbian OS 镜像
+            ### 以下是 Armbian OS 镜像
             - 本次固件基带为${{ inputs.armbian_board }}
             - 系统信息：
             - 默认用户名：root

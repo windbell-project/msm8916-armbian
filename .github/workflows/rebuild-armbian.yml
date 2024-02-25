@@ -81,6 +81,9 @@ jobs:
           artifacts: "msm8916-armbian/rootfs.img,msm8916-armbian/kernel/boot.img"
           name: ${{ steps.repack.outputs.build_tag }}
           tag: ${{ steps.repack.outputs.build_tag }}
+          allowUpdates: true
+          removeArtifacts: false
+          replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
           body: |
             ### 以下是 Armbian OS 镜像
